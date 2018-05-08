@@ -1,4 +1,5 @@
 import urllib3
+from urllib3.contrib.socks import SOCKSProxyManager
 import logging
 import json
 import re
@@ -31,6 +32,9 @@ def set_proxy(url, basic_auth=None):
     if not url:
         _pools['default'] = urllib3.PoolManager(**_default_pool_params)
         _onetime_pool_spec = (urllib3.PoolManager, _onetime_pool_params)
+    elif url.startswith('socks'):
+        _pools['default'] = SOCKSProxyManager(url, **_default_pool_params)
+        _onetime_pool_spec = (SOCKSProxyManager, dict(proxy_url=url, **_onetime_pool_params))
     elif basic_auth:
         h = urllib3.make_headers(proxy_basic_auth=':'.join(basic_auth))
         _pools['default'] = urllib3.ProxyManager(url, proxy_headers=h, **_default_pool_params)
